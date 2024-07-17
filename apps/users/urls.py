@@ -8,6 +8,8 @@ from users.api import (
     ConfirmEmailView,
     PasswordRestoreRequestView,
     PasswordRestoreView,
+    CustomUserView,
+    ConfirmEmailRequestView,
 )
 
 from utils.constants import (
@@ -43,6 +45,11 @@ urlpatterns = [
         name=CONFIRM_EMAIL,
     ),
     path(
+        'confirm_email/request/',
+        ConfirmEmailRequestView.as_view(),
+        name='confirm_email_request',
+    ),
+    path(
         'password_restore/<str:url_hash>/',
         PasswordRestoreView.as_view(),
         name=PASSWORD_RESTORE,
@@ -52,4 +59,9 @@ urlpatterns = [
         PasswordRestoreRequestView.as_view(),
         name='password_restore_request',
     ),
+    path(
+        '',
+        CustomUserView.as_view(),
+        name='custom_user',
+    )
 ]
