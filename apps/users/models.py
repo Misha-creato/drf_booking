@@ -8,9 +8,6 @@ from django.contrib.auth.models import (
 )
 
 
-NICKNAME_RANGE_NUMBER = 10**10
-
-
 class CustomUserManager(BaseUserManager):
     def create_user(self, email: str, password: str, **extra_fields):
         if not email:
@@ -72,13 +69,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomUserManager()
 
+    def __make_nickname(self):
+        random = secrets.SystemRandom()
+        random_number = ''.join([str(random.randint(0, 9)) for i in range(10)])
+        self.nickname = f'user{random_number}'
+
     def save(self, *args, **kwargs):
         if not self.pk:
-            start = NICKNAME_RANGE_NUMBER // 10
-            end = NICKNAME_RANGE_NUMBER - 1
-            random = secrets.SystemRandom()
-            random_number = random.randint(start, end)
-            self.nickname = 'user' + str(random_number)
+            self.__make_nickname()
         super().save(*args, **kwargs)
 
     class Meta:
