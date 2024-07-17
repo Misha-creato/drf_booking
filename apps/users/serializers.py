@@ -54,3 +54,64 @@ class PasswordRestoreSerializer(serializers.Serializer):
                 "Пароли не совпадают"
             )
         return attrs
+
+
+class DetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            'email',
+            'nickname',
+            'email_confirmed',
+        ]
+
+
+class UpdateSerializer(serializers.ModelSerializer):
+    old_password = serializers.CharField(
+        max_length=128,
+        required=False,
+    )
+    new_password = serializers.CharField(
+        max_length=128,
+        required=False,
+    )
+    confirm_password = serializers.CharField(
+        max_length=128,
+        required=False,
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            'nickname',
+            'old_password',
+            'new_password',
+            'confirm_password',
+        ]
+        extra_kwargs = {
+            'nickname': {'required': False},
+        }
+
+    def validate(self, attrs):
+        old_password = attrs.get('old_password')
+        new_password = attrs.get('new_password')
+        confirm_password = attrs.get('confirm_password')
+        passwords = [old_password, new_password, confirm_password]
+
+        if all(password is None for password in passwords):
+            return attrs
+
+        if not all(passwords):
+            raise serializers.ValidationError(
+                "Для смены пароля нужны old_password, new_password, confirm_password"
+            )
+        if not self.instance.check_password(old_password):
+            raise serializers.ValidationError(
+                "Старый пароль неверный"
+            )
+        if new_password != confirm_password:
+            raise serializers.ValidationError(
+                "Пароли не совпадают"
+            )
+        return attrs
