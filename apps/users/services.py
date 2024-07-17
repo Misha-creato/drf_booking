@@ -15,7 +15,10 @@ from users.serializers import (
     RegisterSerializer,
     AuthSerializer,
     RefreshAndLogoutSerializer,
-    PasswordRestoreRequestSerializer, PasswordRestoreSerializer,
+    PasswordRestoreRequestSerializer,
+    PasswordRestoreSerializer,
+    DetailSerializer,
+    UpdateSerializer,
 )
 
 from utils.constants import (
@@ -92,7 +95,7 @@ def register(data: QueryDict, host: str) -> (int, dict):
         msg=f'Успешно зарегистрирован пользователь с данными: {user_data}',
     )
 
-    send_email_by_type(
+    send_user_email(
         user=user,
         host=host,
         email_type=CONFIRM_EMAIL,
@@ -109,6 +112,8 @@ def register(data: QueryDict, host: str) -> (int, dict):
         )
         return 201, {}
 
+    token['email'] = user.email
+    token['nickname'] = user.nickname
     refresh = str(token)
     access = str(token.access_token)
     response_data = {
@@ -186,6 +191,8 @@ def auth(data: QueryDict) -> (int, dict):
         )
         return 500, {}
 
+    token['email'] = user.email
+    token['nickname'] = user.nickname
     refresh = str(token)
     access = str(token.access_token)
     response_data = {
@@ -417,7 +424,7 @@ def password_restore_request(data: QueryDict, host: str) -> (int, dict):
         )
         return 404, {}
 
-    status_code = send_email_by_type(
+    status_code = send_user_email(
         user=user,
         email_type=PASSWORD_RESTORE,
         host=host,
@@ -499,7 +506,128 @@ def password_restore(data: QueryDict, url_hash: str) -> (int, dict):
     return 200, {}
 
 
-def send_email_by_type(user: CustomUser, email_type: str, host: str) -> int:
+def detail(user: CustomUser) -> (int, dict):
+    '''
+    Данные пользователя
+
+    Args:
+        user: пользователь
+
+    Returns:
+        Код статуса и словарь данных
+        200,
+        {
+            "email": "test@cc.com",
+            "nickname": "user012345789",
+            "email_confirmed": True,
+        }
+    '''
+    logger.info(
+        msg=f'Получение данных пользователя {user}',
+    )
+
+    response_data = DetailSerializer(
+        instance=user,
+    ).data
+    logger.info(
+        msg=f'Данные пользователя {user} успешно получены: {response_data}',
+    )
+    return 200, response_data
+
+
+def remove(user: CustomUser) -> (int, dict):
+    '''
+    Удаление пользователя
+
+    Args:
+        user: пользователь
+
+    Returns:
+        Код статуса и словарь данных
+        200, {}
+    '''
+    email = user.email
+    logger.info(
+        msg=f'Удаление пользователя {email}',
+    )
+
+    try:
+        user.delete()
+    except Exception as exc:
+        logger.error(
+            msg=f'Не удалось удалить пользователя {email}: {exc}',
+        )
+        return 500, {}
+
+    logger.info(
+        msg=f'Успешное удален пользователь {email}',
+    )
+    return 200, {}
+
+
+def update(data: QueryDict, user: CustomUser) -> (int, dict):
+    '''
+    Обновление данных пользователя
+
+    Args:
+        data: данные пользователя
+            {
+              "nickname": "new_nickname",
+              "old_password": "old_password123",
+              "new_password": "new_password123",
+              "confirm_password": "new_password123",
+            }
+        user: пользователь
+
+    Returns:
+        Код статуса и словарь данных
+        200,
+        {
+            "email": "test@cc.com",
+            "nickname": "new_nickname",
+            "email_confirmed": True,
+        }
+    '''
+    user_data = get_log_user_data(
+        user_data=dict(data),
+    )
+    logger.info(
+        msg=f'Обновление данных пользователя {user}: {user_data}',
+    )
+
+    serializer = UpdateSerializer(
+        instance=user,
+        data=data,
+    )
+    if not serializer.is_valid():
+        logger.error(
+            msg=f'Невалидные данные {user_data} для обновления пользователя {user}: '
+                f'{serializer.errors}',
+        )
+        return 400, {}
+
+    validated_data = serializer.validated_data
+    try:
+        serializer.update(
+            instance=user,
+            validated_data=validated_data,
+        )
+    except Exception as exc:
+        logger.error(
+            msg=f'Не удалось обновить данные {user_data} пользователя {user}: {exc}',
+        )
+        return 500, {}
+
+    logger.info(
+        msg=f'Успешно обновлены данныe {user_data} пользователя {user}',
+    )
+    response_data = DetailSerializer(
+        instance=user,
+    ).data
+    return 200, response_data
+
+
+def send_user_email(user: CustomUser, email_type: str, host: str) -> int:
     '''
     Отправка письма по типу
 
@@ -547,3 +675,39 @@ def send_email_by_type(user: CustomUser, email_type: str, host: str) -> int:
     )
     status = email.send()
     return status
+
+
+def confirm_email_request(user: CustomUser, host: str) -> (int, dict):
+    '''
+    Запрос на отправку письма для подтверждения email
+
+    Args:
+        user: пользователь
+        host: хост для создания полного url пути
+                    используется в отправке писем
+
+    Returns:
+        Код статуса и словарь данных
+        200, {}
+    '''
+    logger.info(
+        msg=f'Запрос на отправку письма для подтверждения email '
+            f'пользователя {user}',
+    )
+
+    status_code = send_user_email(
+        user=user,
+        email_type=CONFIRM_EMAIL,
+        host=host,
+    )
+    if status_code != 200:
+        logger.error(
+            msg='Запрос на отправку письма для подтверждения email '
+                f'пользователя {user} не прошел',
+        )
+    else:
+        logger.info(
+            msg='Запрос на отправку письма для подтверждения email '
+                f'пользователя {user} прошел успешно',
+        )
+    return status_code, {}
