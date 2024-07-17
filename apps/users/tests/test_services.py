@@ -13,7 +13,12 @@ from users.services import (
     refresh_token,
     logout,
     confirm_email,
-    password_restore_request, password_restore,
+    password_restore_request,
+    password_restore,
+    detail,
+    remove,
+    update,
+    confirm_email_request,
 )
 
 
@@ -31,9 +36,9 @@ class ServicesTest(TestCase):
             url_hash='fc0ecf9c-4c37-4bb2-8c22-938a1dc65da4',
         )
 
-    @patch('users.services.send_email_by_type')
-    def test_register(self, mock_send_email_by_type):
-        mock_send_email_by_type.return_value = 200
+    @patch('users.services.send_user_email')
+    def test_register(self, mock_send_user_email):
+        mock_send_user_email.return_value = 200
         path = f'{self.path}/register'
         fixtures = (
             (200, 'valid'),
@@ -81,6 +86,7 @@ class ServicesTest(TestCase):
         token = RefreshToken.for_user(
             user=self.user,
         )
+
         path = f'{self.path}/refresh_token'
         fixtures = (
             (200, 'valid'),
@@ -130,7 +136,6 @@ class ServicesTest(TestCase):
                 data=data,
                 user=self.user,
             )
-
             self.assertEqual(status_code, code, msg=fixture)
 
     def test_confirm_email(self):
@@ -151,9 +156,9 @@ class ServicesTest(TestCase):
             )
             self.assertEqual(status_code, code, msg=fixture)
 
-    @patch('users.services.send_email_by_type')
-    def test_password_restore_request(self, mock_send_email_by_type):
-        mock_send_email_by_type.return_value = 200
+    @patch('users.services.send_user_email')
+    def test_password_restore_request(self, mock_send_user_email):
+        mock_send_user_email.return_value = 200
         path = f'{self.path}/password_restore_request'
         fixtures = (
             (200, 'valid'),
@@ -196,7 +201,49 @@ class ServicesTest(TestCase):
                 url_hash=url_hash,
                 data=data,
             )
-
             self.assertEqual(status_code, code, msg=fixture)
 
+    def test_detail(self):
+        status_code, response_data = detail(
+            user=self.user,
+        )
+        self.assertEqual(status_code, 200)
 
+    def test_remove(self):
+        status_code, response_data = remove(
+            user=self.user,
+        )
+        self.assertEqual(status_code, 200)
+
+    def test_update(self):
+        path = f'{self.path}/update'
+        fixtures = (
+            (200, 'valid'),
+            (400, 'invalid_old_password'),
+            (400, 'invalid_structure'),
+            (400, 'password_mismatch'),
+        )
+
+        for code, name in fixtures:
+            fixture = f'{code}_{name}'
+
+            with open(f'{path}/{fixture}_request.json') as file:
+                data = json.load(file)
+
+            status_code, response_data = update(
+                data=data,
+                user=self.user,
+            )
+            self.assertEqual(status_code, code, msg=fixture)
+
+    @patch('users.services.send_user_email')
+    def test_confirm_email_request(self, mock_send_user_email):
+        mock_send_user_email.return_value = 200
+
+        request = self.client.post('/').wsgi_request
+        host = request.get_host()
+        status_code, response_data = confirm_email_request(
+            user=self.user,
+            host=host,
+        )
+        self.assertEqual(status_code, 200)
