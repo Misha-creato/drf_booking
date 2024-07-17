@@ -1,0 +1,6 @@
+{
+  "nickname": "new_nickname",
+  "old_password": "test123",
+  "new_password": "new_password123",
+  "confirm_password": "new_password123"
+}
