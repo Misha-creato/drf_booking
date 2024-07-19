@@ -4,7 +4,12 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import (
+    RefreshToken,
+    AccessToken,
+    AuthUser,
+    Token
+)
 
 from users.models import CustomUser
 from users.services import (
@@ -247,3 +252,38 @@ class ServicesTest(TestCase):
             host=host,
         )
         self.assertEqual(status_code, 200)
+
+    def test_custom_token_class(self):
+        class CustomRefreshToken(RefreshToken):
+            nickname = ''
+            email = ''
+            user = ''
+
+            @classmethod
+            def for_user(cls, user: AuthUser) -> Token:
+                cls.nickname = user.nickname
+                cls.email = user.email
+                cls.user = user
+                return super().for_user(user)
+
+            @property
+            def access_token(self) -> AccessToken:
+                token = super().access_token
+                token['nickname'] = self.user.nickname
+                token['email'] = self.user.email
+                return token
+
+        token = CustomRefreshToken.for_user(
+            user=self.user,
+        )
+        print(token.payload)
+        print(token.access_token.payload)
+        refresh = CustomRefreshToken(str(token))
+        self.user.nickname = 'test'
+        self.user.save()
+        print(refresh.access_token.payload)
+        refresh.blacklist()
+        refresh.set_jti()
+        refresh.set_iat()
+        refresh.set_exp()
+        print(refresh.payload)
