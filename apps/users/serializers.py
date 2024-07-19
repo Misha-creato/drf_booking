@@ -115,3 +115,8 @@ class UpdateSerializer(serializers.ModelSerializer):
                 "Пароли не совпадают"
             )
         return attrs
+
+
+class ResponseSerializer(serializers.Serializer):
+    message = serializers.CharField()
+    data = serializers.DictField(child=serializers.CharField())
