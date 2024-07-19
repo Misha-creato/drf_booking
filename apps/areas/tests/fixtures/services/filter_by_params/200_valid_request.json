@@ -1,0 +1,7 @@
+{
+  "capacity": 200,
+  "min_price": 1000,
+  "max_price": 100000,
+  "width": 100,
+  "length": 100
+}

@@ -1,0 +1,52 @@
+[
+  {
+    "model": "areas.contact",
+    "pk": 1,
+    "fields": {
+      "area": 1,
+      "contact": "8-800-555-35-35",
+      "contact_type": "Phone",
+      "created_at": "2024-07-19T11:26:13.923Z"
+    }
+  },
+  {
+    "model": "areas.contact",
+    "pk": 2,
+    "fields": {
+      "area": 4,
+      "contact": "8-123-456-78-90",
+      "contact_type": "Phone",
+      "created_at": "2024-07-19T13:27:08.496Z"
+    }
+  },
+  {
+    "model": "areas.contact",
+    "pk": 3,
+    "fields": {
+      "area": 4,
+      "contact": "test3@cc.com",
+      "contact_type": "Email",
+      "created_at": "2024-07-19T13:27:08.498Z"
+    }
+  },
+  {
+    "model": "areas.contact",
+    "pk": 4,
+    "fields": {
+      "area": 3,
+      "contact": "@test2",
+      "contact_type": "Instagram",
+      "created_at": "2024-07-19T13:27:41.299Z"
+    }
+  },
+  {
+    "model": "areas.contact",
+    "pk": 5,
+    "fields": {
+      "area": 1,
+      "contact": "wa.me/88005553535",
+      "contact_type": "Whatsapp",
+      "created_at": "2024-07-19T13:30:20.557Z"
+    }
+  }
+]

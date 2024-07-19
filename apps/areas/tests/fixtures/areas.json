@@ -1,0 +1,47 @@
+[
+  {
+    "model": "areas.area",
+    "pk": 1,
+    "fields": {
+      "name": "Test1",
+      "description": "<p>description</p>",
+      "address": "Address test 1",
+      "available": true,
+      "price": "1000",
+      "capacity": 1000,
+      "width": 200,
+      "length": 100,
+      "created_at": "2024-07-19T11:26:13.920Z"
+    }
+  },
+  {
+    "model": "areas.area",
+    "pk": 3,
+    "fields": {
+      "name": "Test2",
+      "description": "<p>&nbsp;</p>",
+      "address": "Address test 2",
+      "available": true,
+      "price": "20 000",
+      "capacity": 200,
+      "width": 300,
+      "length": 100,
+      "created_at": "2024-07-19T12:40:10.428Z"
+    }
+  },
+  {
+    "model": "areas.area",
+    "pk": 4,
+    "fields": {
+      "name": "Test3",
+      "description": "<p>&nbsp;</p>",
+      "address": "Address test 3",
+      "available": true,
+      "price": "10 000",
+      "capacity": 100,
+      "width": 100,
+      "length": 200,
+      "created_at": "2024-07-19T12:58:32.531Z"
+    }
+  }
+]
