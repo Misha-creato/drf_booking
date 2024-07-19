@@ -219,7 +219,8 @@ def refresh_token(data: QueryDict) -> (int, dict):
         Код статуса и словарь данных
         200,
         {
-            "access": "access_token"
+            "access": "access_token",
+            "refresh": "new_refresh_token"
         }
     '''
 
@@ -458,6 +459,7 @@ def password_restore(data: QueryDict, url_hash: str) -> (int, dict):
         Код статуса и словарь данных
         200, {}
     '''
+
     logger.info(
         msg=f'Восстановление пароля пользователя с хэшем: {url_hash}',
     )
@@ -522,6 +524,7 @@ def detail(user: CustomUser) -> (int, dict):
             "email_confirmed": True,
         }
     '''
+
     logger.info(
         msg=f'Получение данных пользователя {user}',
     )
@@ -546,6 +549,7 @@ def remove(user: CustomUser) -> (int, dict):
         Код статуса и словарь данных
         200, {}
     '''
+
     email = user.email
     logger.info(
         msg=f'Удаление пользователя {email}',
@@ -588,6 +592,7 @@ def update(data: QueryDict, user: CustomUser) -> (int, dict):
             "email_confirmed": True,
         }
     '''
+
     user_data = get_log_user_data(
         user_data=dict(data),
     )
@@ -690,6 +695,7 @@ def confirm_email_request(user: CustomUser, host: str) -> (int, dict):
         Код статуса и словарь данных
         200, {}
     '''
+
     logger.info(
         msg=f'Запрос на отправку письма для подтверждения email '
             f'пользователя {user}',
