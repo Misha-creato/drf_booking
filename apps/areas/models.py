@@ -43,6 +43,7 @@ class Area(models.Model):
         return self.name
 
     class Meta:
+        ordering = ['-created_at']
         db_table = 'areas'
         verbose_name = 'Площадка'
         verbose_name_plural = 'Площадки'
