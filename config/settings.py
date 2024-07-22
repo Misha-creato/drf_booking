@@ -52,6 +52,7 @@ DJANGO_APPS = [
     'solo',
     'drf_spectacular',
     'django_ckeditor_5',
+    'django_filters',
 ]
 
 PROJECT_APPS = [
@@ -130,6 +131,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
 # JWT
