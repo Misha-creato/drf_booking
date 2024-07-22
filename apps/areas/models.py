@@ -23,7 +23,7 @@ class Area(models.Model):
     price = models.CharField(
         verbose_name='Цена за сутки',
         max_length=256,
-        default='Не указана',
+        default='0',
     )
     capacity = models.PositiveIntegerField(
         verbose_name='Вместимость человек',
@@ -51,6 +51,7 @@ class Area(models.Model):
 
 class Contact(models.Model):
     area = models.ForeignKey(
+        verbose_name='Площадка',
         to=Area,
         related_name='contacts',
         on_delete=models.CASCADE,
@@ -76,6 +77,7 @@ class Contact(models.Model):
 
 class Photo(models.Model):
     area = models.ForeignKey(
+        verbose_name='Площадка',
         to=Area,
         related_name='photos',
         on_delete=models.CASCADE,
