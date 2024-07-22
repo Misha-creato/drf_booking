@@ -47,4 +47,5 @@ class AreaSerializer(serializers.ModelSerializer):
             'length',
             'contacts',
             'photos',
+            'created_at',
         ]
