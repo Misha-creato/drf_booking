@@ -240,27 +240,20 @@ def refresh_token(data: QueryDict) -> (int, dict):
     validated_data = serializer.validated_data
     try:
         refresh = RefreshToken(validated_data['refresh'])
+        user_id = refresh.payload['user_id']
+        print(refresh.payload)
+        user = CustomUser.objects.get(id=user_id)
     except Exception as exc:
         logger.error(
             msg=f'Не удалось обновить токен: {exc}',
         )
         return 403, {}
 
+    refresh['nickname'] = user.nickname
     response_data = {
+        'refresh': str(refresh),
         'access': str(refresh.access_token),
     }
-    try:
-        refresh.blacklist()
-    except Exception as exc:
-        logger.error(
-            msg=f'Не удалось занести токен в черный список: {exc}',
-        )
-        return 500, {}
-
-    refresh.set_jti()
-    refresh.set_iat()
-    refresh.set_exp()
-    response_data['refresh'] = str(refresh)
     logger.info(
         msg='Успешно обновлен токен'
     )
