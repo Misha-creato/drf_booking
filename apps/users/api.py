@@ -1,8 +1,22 @@
-from drf_spectacular.utils import extend_schema, OpenApiExample
+from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from users.doc import (
+    Auth200Response,
+    DefaultResponse,
+    Register200Response,
+    RefreshToken200Response,
+    Logout200Response,
+    ConfirmEmail200Response,
+    ConfirmEmailRequest200Response,
+    PasswordRestoreRequest200Response,
+    PasswordRestore200Response,
+    Detail200Response,
+    Update200Response,
+    Remove200Response,
+)
 from users.serializers import (
     RegisterSerializer,
     AuthSerializer,
@@ -10,11 +24,9 @@ from users.serializers import (
     PasswordRestoreRequestSerializer,
     PasswordRestoreSerializer,
     UpdateSerializer,
-    ResponseSerializer,
 )
 from utils.response_patterns import (
     generate_response,
-    status_messages,
 )
 
 from users.services import (
@@ -37,62 +49,14 @@ class RegisterView(APIView):
     @extend_schema(
         request=RegisterSerializer,
         responses={
-            200: ResponseSerializer,
-            201: ResponseSerializer,
-            400: ResponseSerializer,
-            406: ResponseSerializer,
-            500: ResponseSerializer,
+            200: Register200Response,
+            201: DefaultResponse,
+            400: DefaultResponse,
+            406: DefaultResponse,
+            500: DefaultResponse,
         },
-        examples=[
-            OpenApiExample(
-                name='200',
-                value={
-                    'message': status_messages[200],
-                    'data': {
-                        'refresh': 'refresh_token',
-                        'access': 'access_token',
-                    }
-                },
-                response_only=True,
-                status_codes=[200],
-            ),
-            OpenApiExample(
-                name='201',
-                value={
-                    'message': status_messages[201],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[201],
-            ),
-            OpenApiExample(
-                name='400',
-                value={
-                    'message': status_messages[400],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[400],
-            ),
-            OpenApiExample(
-                name='406',
-                value={
-                    'message': status_messages[406],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[406],
-            ),
-            OpenApiExample(
-                name='500',
-                value={
-                    'message': status_messages[500],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[500],
-            ),
-        ],
+        description=Register200Response.__doc__,
+        summary='Регистрация пользователя',
     )
     def post(self, request):
         data = request.data
@@ -116,52 +80,13 @@ class AuthView(APIView):
     @extend_schema(
         request=AuthSerializer,
         responses={
-            200: RegisterSerializer,
-            400: RegisterSerializer,
-            401: RegisterSerializer,
-            500: RegisterSerializer,
+            200: Auth200Response,
+            400: DefaultResponse,
+            401: DefaultResponse,
+            500: DefaultResponse,
         },
-        examples=[
-            OpenApiExample(
-                name='200',
-                value={
-                    'message': status_messages[200],
-                    'data': {
-                        'refresh': 'refresh_token',
-                        'access': 'access_token',
-                    }
-                },
-                response_only=True,
-                status_codes=[200],
-            ),
-            OpenApiExample(
-                name='400',
-                value={
-                    'message': status_messages[400],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[400],
-            ),
-            OpenApiExample(
-                name='401',
-                value={
-                    'message': status_messages[401],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[401],
-            ),
-            OpenApiExample(
-                name='500',
-                value={
-                    'message': status_messages[500],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[500],
-            ),
-        ],
+        description=Auth200Response.__doc__,
+        summary='Аутентификация пользователя',
     )
     def post(self, request):
         data = request.data
@@ -183,52 +108,13 @@ class RefreshTokenView(APIView):
     @extend_schema(
         request=RefreshAndLogoutSerializer,
         responses={
-            200: ResponseSerializer,
-            400: ResponseSerializer,
-            403: ResponseSerializer,
-            500: ResponseSerializer,
+            200: RefreshToken200Response,
+            400: DefaultResponse,
+            403: DefaultResponse,
+            500: DefaultResponse,
         },
-        examples=[
-            OpenApiExample(
-                name='200',
-                value={
-                    'message': status_messages[200],
-                    'data': {
-                        'access': 'access_token',
-                        'refresh': 'new_refresh_token',
-                    }
-                },
-                response_only=True,
-                status_codes=[200],
-            ),
-            OpenApiExample(
-                name='400',
-                value={
-                    'message': status_messages[400],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[400],
-            ),
-            OpenApiExample(
-                name='403',
-                value={
-                    'message': status_messages[403],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[403],
-            ),
-            OpenApiExample(
-                name='500',
-                value={
-                    'message': status_messages[500],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[500],
-            ),
-        ],
+        description=RefreshToken200Response.__doc__,
+        summary='Обновление токена пользователя',
     )
     def post(self, request):
         data = request.data
@@ -252,39 +138,12 @@ class LogoutView(APIView):
     @extend_schema(
         request=RefreshAndLogoutSerializer,
         responses={
-            200: ResponseSerializer,
-            400: ResponseSerializer,
-            500: ResponseSerializer,
+            200: Logout200Response,
+            400: DefaultResponse,
+            500: DefaultResponse,
         },
-        examples=[
-            OpenApiExample(
-                name='200',
-                value={
-                    'message': status_messages[200],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[200],
-            ),
-            OpenApiExample(
-                name='400',
-                value={
-                    'message': status_messages[400],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[400],
-            ),
-            OpenApiExample(
-                name='500',
-                value={
-                    'message': status_messages[500],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[500],
-            ),
-        ],
+        description=Logout200Response.__doc__,
+        summary='Выход из системы пользователя',
     )
     def post(self, request):
         data = request.data
@@ -307,39 +166,12 @@ class ConfirmEmailView(APIView):
 
     @extend_schema(
         responses={
-            200: ResponseSerializer,
-            404: ResponseSerializer,
-            500: ResponseSerializer,
+            200: ConfirmEmail200Response,
+            404: DefaultResponse,
+            500: DefaultResponse,
         },
-        examples=[
-            OpenApiExample(
-                name='200',
-                value={
-                    'message': status_messages[200],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[200],
-            ),
-            OpenApiExample(
-                name='404',
-                value={
-                    'message': status_messages[404],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[404],
-            ),
-            OpenApiExample(
-                name='500',
-                value={
-                    'message': status_messages[500],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[500],
-            ),
-        ],
+        description=ConfirmEmail200Response.__doc__,
+        summary='Подтверждение email пользователя',
     )
     def get(self, request, url_hash):
         status_code, response_data = confirm_email(
@@ -362,49 +194,13 @@ class ConfirmEmailRequestView(APIView):
     @extend_schema(
         request=None,
         responses={
-            200: ResponseSerializer,
-            403: ResponseSerializer,
-            500: ResponseSerializer,
-            501: ResponseSerializer,
+            200: ConfirmEmailRequest200Response,
+            403: DefaultResponse,
+            500: DefaultResponse,
+            501: DefaultResponse,
         },
-        examples=[
-            OpenApiExample(
-                name='200',
-                value={
-                    'message': status_messages[200],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[200],
-            ),
-            OpenApiExample(
-                name='403',
-                value={
-                    'message': status_messages[403],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[403],
-            ),
-            OpenApiExample(
-                name='500',
-                value={
-                    'message': status_messages[500],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[500],
-            ),
-            OpenApiExample(
-                name='501',
-                value={
-                    'message': status_messages[501],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[501],
-            ),
-        ],
+        description=ConfirmEmailRequest200Response.__doc__,
+        summary='Запрос на подтверждение email пользователя',
     )
     def post(self, request):
         user = request.user
@@ -428,69 +224,15 @@ class PasswordRestoreRequestView(APIView):
     @extend_schema(
         request=PasswordRestoreRequestSerializer,
         responses={
-            200: ResponseSerializer,
-            400: ResponseSerializer,
-            403: ResponseSerializer,
-            404: ResponseSerializer,
-            500: ResponseSerializer,
-            501: ResponseSerializer,
+            200: PasswordRestoreRequest200Response,
+            400: DefaultResponse,
+            403: DefaultResponse,
+            404: DefaultResponse,
+            500: DefaultResponse,
+            501: DefaultResponse,
         },
-        examples=[
-            OpenApiExample(
-                name='200',
-                value={
-                    'message': status_messages[200],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[200],
-            ),
-            OpenApiExample(
-                name='400',
-                value={
-                    'message': status_messages[400],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[400],
-            ),
-            OpenApiExample(
-                name='403',
-                value={
-                    'message': status_messages[403],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[403],
-            ),
-            OpenApiExample(
-                name='404',
-                value={
-                    'message': status_messages[404],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[404],
-            ),
-            OpenApiExample(
-                name='500',
-                value={
-                    'message': status_messages[500],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[500],
-            ),
-            OpenApiExample(
-                name='501',
-                value={
-                    'message': status_messages[501],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[501],
-            ),
-        ],
+        description=PasswordRestoreRequest200Response.__doc__,
+        summary='Запрос на восстановление пароля пользователя',
     )
     def post(self, request):
         data = request.data
@@ -514,49 +256,13 @@ class PasswordRestoreView(APIView):
     @extend_schema(
         request=PasswordRestoreSerializer,
         responses={
-            200: ResponseSerializer,
-            400: ResponseSerializer,
-            404: ResponseSerializer,
-            500: ResponseSerializer,
+            200: PasswordRestore200Response,
+            400: DefaultResponse,
+            404: DefaultResponse,
+            500: DefaultResponse,
         },
-        examples=[
-            OpenApiExample(
-                name='200',
-                value={
-                    'message': status_messages[200],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[200],
-            ),
-            OpenApiExample(
-                name='400',
-                value={
-                    'message': status_messages[400],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[400],
-            ),
-            OpenApiExample(
-                name='404',
-                value={
-                    'message': status_messages[404],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[404],
-            ),
-            OpenApiExample(
-                name='500',
-                value={
-                    'message': status_messages[500],
-                    'data': {}
-                },
-                response_only=True,
-                status_codes=[500],
-            ),
-        ],
+        description=PasswordRestore200Response.__doc__,
+        summary='Восстановление пароля пользователя',
     )
     def post(self, request, url_hash):
         data = request.data
@@ -580,23 +286,10 @@ class CustomUserView(APIView):
 
     @extend_schema(
         responses={
-            200: ResponseSerializer,
+            200: Detail200Response,
         },
-        examples=[
-            OpenApiExample(
-                name='200',
-                value={
-                    'message': status_messages[200],
-                    'data': {
-                            "email": "test@cc.com",
-                            "nickname": "user012345789",
-                            "email_confirmed": True,
-                    },
-                },
-                response_only=True,
-                status_codes=[200],
-            ),
-        ],
+        description=Detail200Response.__doc__,
+        summary='Данные пользователя',
     )
     def get(self, request):
         user = request.user
@@ -615,43 +308,12 @@ class CustomUserView(APIView):
     @extend_schema(
         request=UpdateSerializer,
         responses={
-            200: ResponseSerializer,
-            400: ResponseSerializer,
-            500: ResponseSerializer,
+            200: Update200Response,
+            400: DefaultResponse,
+            500: DefaultResponse,
         },
-        examples=[
-            OpenApiExample(
-                name='200',
-                value={
-                    'message': status_messages[200],
-                    'data': {
-                            "email": "test@cc.com",
-                            "nickname": "user012345789",
-                            "email_confirmed": True,
-                    },
-                },
-                response_only=True,
-                status_codes=[200],
-            ),
-            OpenApiExample(
-                name='400',
-                value={
-                    'message': status_messages[400],
-                    'data': {},
-                },
-                response_only=True,
-                status_codes=[400],
-            ),
-            OpenApiExample(
-                name='500',
-                value={
-                    'message': status_messages[500],
-                    'data': {},
-                },
-                response_only=True,
-                status_codes=[500],
-            ),
-        ],
+        description=Update200Response.__doc__,
+        summary='Обновление данных пользователя',
     )
     def patch(self, request):
         data = request.data
@@ -671,29 +333,11 @@ class CustomUserView(APIView):
 
     @extend_schema(
         responses={
-            200: ResponseSerializer,
-            500: ResponseSerializer,
+            200: Remove200Response,
+            500: DefaultResponse,
         },
-        examples=[
-            OpenApiExample(
-                name='200',
-                value={
-                    'message': status_messages[200],
-                    'data': {},
-                },
-                response_only=True,
-                status_codes=[200],
-            ),
-            OpenApiExample(
-                name='500',
-                value={
-                    'message': status_messages[500],
-                    'data': {},
-                },
-                response_only=True,
-                status_codes=[500],
-            ),
-        ],
+        description=Remove200Response.__doc__,
+        summary='Удаление пользователя',
     )
     def delete(self, request):
         user = request.user
