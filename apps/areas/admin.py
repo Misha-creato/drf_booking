@@ -1,6 +1,5 @@
 from django.contrib import admin
 
-from areas.forms import AreaAdminForm
 from areas.models import (
     Area,
     Contact,
@@ -20,7 +19,6 @@ class PhotoInline(admin.StackedInline):
 
 @admin.register(Area)
 class AreaAdmin(admin.ModelAdmin):
-    form = AreaAdminForm
     inlines = [
         ContactInline,
         PhotoInline,
