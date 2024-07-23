@@ -40,14 +40,14 @@ urlpatterns = [
         name='logout',
     ),
     path(
-        'confirm_email/<str:url_hash>/',
-        ConfirmEmailView.as_view(),
-        name=CONFIRM_EMAIL,
-    ),
-    path(
         'confirm_email/request/',
         ConfirmEmailRequestView.as_view(),
         name='confirm_email_request',
+    ),
+    path(
+        'confirm_email/<str:url_hash>/',
+        ConfirmEmailView.as_view(),
+        name=CONFIRM_EMAIL,
     ),
     path(
         'password_restore/<str:url_hash>/',
