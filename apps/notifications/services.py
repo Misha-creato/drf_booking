@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
 
@@ -58,14 +59,18 @@ class Email:
         logger.info(
             msg='Получение настроек email',
         )
-        try:
-            email_settings = EmailSettings.get_solo()
-        except Exception as exc:
-            logger.error(
-                msg=f'Не удалось получить настройки email'
-                    f'Ошибки: {exc}',
-            )
-            return None
+
+        email_settings = cache.get('email_settings')
+        if email_settings is None:
+            try:
+                email_settings = EmailSettings.get_solo()
+                cache.set('email_settings', email_settings)
+            except Exception as exc:
+                logger.error(
+                    msg=f'Не удалось получить настройки email'
+                        f'Ошибки: {exc}',
+                )
+                return None
         logger.info(
             msg='Настройки email получены',
         )
