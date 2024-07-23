@@ -1,11 +1,10 @@
 from typing import Any
 
-from django.db.models.expressions import RawSQL
-
 from areas.models import Area
 from areas.serializers import AreaSerializer
 
 from utils.logger import get_logger
+
 
 logger = get_logger(__name__)
 
@@ -51,12 +50,7 @@ def get_areas(request: Any, filter_backends: list, view: Any) -> (int, list):
     )
 
     try:
-        areas = Area.objects.annotate(
-            price_int=RawSQL(
-                "CAST(REPLACE(price, ' ', '') AS INTEGER)",
-                []
-            )
-        ).filter(
+        areas = Area.objects.filter(
             available=True,
         ).prefetch_related('contacts', 'photos')
     except Exception as exc:
@@ -83,7 +77,7 @@ def get_areas(request: Any, filter_backends: list, view: Any) -> (int, list):
         many=True,
     ).data
     logger.info(
-        msg=f'Список всех площадок получен',
+        msg='Список всех площадок получен',
     )
     return 200, response_data
 
