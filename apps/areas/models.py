@@ -1,5 +1,7 @@
 from django.db import models
 
+from django_ckeditor_5.fields import CKEditor5Field
+
 from utils.constants import CONTACT_TYPES
 
 
@@ -8,10 +10,11 @@ class Area(models.Model):
         verbose_name='Наименование',
         max_length=256,
     )
-    description = models.TextField(
+    description = CKEditor5Field(
         verbose_name='Описание',
         null=True,
         blank=True,
+        config_name='extends',
     )
     address = models.TextField(
         verbose_name='Адрес',
@@ -20,10 +23,10 @@ class Area(models.Model):
         verbose_name='Доступна',
         default=True,
     )
-    price = models.CharField(
+    price = models.DecimalField(
         verbose_name='Цена за сутки',
-        max_length=256,
-        default='0',
+        max_digits=12,
+        decimal_places=2,
     )
     capacity = models.PositiveIntegerField(
         verbose_name='Вместимость человек',
@@ -75,6 +78,10 @@ class Contact(models.Model):
         verbose_name_plural = 'Контакты'
 
 
+def area_photos_directory_path(instance, filename):
+    return f'areas/{instance.area.name}/photos/{filename}'
+
+
 class Photo(models.Model):
     area = models.ForeignKey(
         verbose_name='Площадка',
@@ -84,7 +91,7 @@ class Photo(models.Model):
     )
     photo = models.ImageField(
         verbose_name='Фото',
-        upload_to='photos/'
+        upload_to=area_photos_directory_path
     )
     created_at = models.DateTimeField(
         verbose_name='Дата размещения',
