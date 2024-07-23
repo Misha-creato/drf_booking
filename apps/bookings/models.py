@@ -19,8 +19,9 @@ class BookingArea(models.Model):
         verbose_name='Площадка',
         to=Area,
         related_name='bookings',
-        on_delete=models.SET_DEFAULT,
-        default='Площадка удалена',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
     user = models.ForeignKey(
         verbose_name='Пользователь',
