@@ -1,12 +1,13 @@
-from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     extend_schema,
-    OpenApiParameter,
-
 )
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import filters
+from rest_framework.filters import (
+    SearchFilter,
+    OrderingFilter,
+)
 
 from django_filters import rest_framework
 
@@ -18,6 +19,7 @@ from areas.doc import (
     DefaultAreaResponse,
     AreaList200Response,
     Area200Response,
+    area_list_parameters,
 )
 from areas.filters import AreaFilter
 from areas.services import (
@@ -28,21 +30,26 @@ from areas.services import (
 
 class AreaListView(APIView):
 
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter, rest_framework.DjangoFilterBackend]
-    search_fields = ['name']
-    ordering_fields = ['price_int', 'created_at', 'capacity']
-    filter_fields = ['price']
+    filter_backends = [
+        SearchFilter,
+        OrderingFilter,
+        rest_framework.DjangoFilterBackend,
+    ]
+    search_fields = [
+        'name',
+    ]
+    ordering_fields = [
+        'price_int',
+        'created_at',
+        'capacity',
+    ]
+    filter_fields = [
+        'price',
+    ]
     filterset_class = AreaFilter
 
     @extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name='search',
-                description='Название площадки',
-                required=False,
-                type=OpenApiTypes.STR
-            ),
-        ],
+        parameters=area_list_parameters,
         responses={
             200: AreaList200Response,
             500: DefaultAreaResponse,
