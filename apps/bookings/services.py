@@ -1,11 +1,7 @@
-import json
-import uuid
-import redis
-
 from django.http import QueryDict
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 
+from areas.models import Area
 from utils.logger import get_logger
 
 from bookings import check
@@ -15,10 +11,14 @@ from bookings.serializers import (
     BookingAreaSerializer,
 )
 
+from utils.project_redis import (
+    get_temporary_bookings_by_key,
+    set_temporary_booking,
+)
+
 
 logger = get_logger(__name__)
 User = get_user_model()
-redis_client = redis.StrictRedis(host='127.0.0.1', port=6379, db=1)
 
 
 def booking_area(area_pk: int, data: QueryDict, user: User) -> (int, dict):
@@ -27,6 +27,26 @@ def booking_area(area_pk: int, data: QueryDict, user: User) -> (int, dict):
         msg=f'Бронирование площадки {area_pk} пользователем {user}, '
             f'временная бронь: {temporary}'
     )
+
+    try:
+        area = Area.objects.filter(
+            pk=area_pk,
+            available=True,
+        ).first()
+    except Exception as exc:
+        logger.error(
+            msg=f'Возникла ошибка при бронировании площадки {area_pk} '
+                f'пользователем {user}: {exc}'
+        )
+        return 500, {}
+
+    if area is None:
+        logger.error(
+            msg=f'Площадка для бронирования {area_pk} пользователем {user} '
+                f'не найдена',
+        )
+        return 404, {}
+
     serializer = BookAreaSerializer(
         data=data,
     )
@@ -44,14 +64,17 @@ def booking_area(area_pk: int, data: QueryDict, user: User) -> (int, dict):
             booked_from__lt=validated_data['end_date'],
             booked_to__gt=validated_data['start_date'],
         )
-        matching_keys = redis_client.keys(f'*area{area_pk}*')
-        temporary_bookings = [json.loads(redis_client.get(key)) for key in matching_keys]
     except Exception as exc:
         logger.error(
             msg=f'Возникла ошибка при бронировании площадки {area_pk} '
                 f'пользователем {user}: {exc}',
         )
         return 500, {}
+
+    key_pattern = f'*area{area_pk}*'
+    status, temporary_bookings = get_temporary_bookings_by_key(
+        key_pattern=key_pattern,
+    )
 
     valid_booking_dates = check.booking_dates(
         constant=constant_bookings,
@@ -81,24 +104,17 @@ def book_area_by_status(area_pk: int, validated_data: dict, user: User) -> (int,
             msg=f'Временное бронирование площадки {area_pk} '
                 f'пользователем {user}',
         )
-        data = {
-            'area': area_pk,
-            'booked_from': start_date.strftime('%Y-%m-%d'),
-            'booked_to': end_date.strftime('%Y-%m-%d'),
-            'user_id': user.id,
-            'created_at': timezone.now().strftime('%Y-%m-%d'),
-        }
-        key = f'area{area_pk}_user{user.id}_{str(uuid.uuid4())}'
-        print(key)
-        try:
-            key_data = json.dumps(data)
-            redis_client.setex(name=key, time=60, value=key_data)
-        except Exception as exc:
+        status, response = set_temporary_booking(
+            area_pk=area_pk,
+            validated_data=validated_data,
+            user=user,
+        )
+        if status != 200:
             logger.error(
-                msg=f'Возникла ошибка при временном бронировании площадки {area_pk} '
-                    f'пользователем {user}: {exc}',
+                msg=f'Не удалось временно забронировать площадку {area_pk} '
+                    f'пользователем {user}',
             )
-            return 500, {}
+            return status, {}
 
         logger.info(
             msg=f'Временное бронирование площадки {area_pk} '
@@ -131,7 +147,7 @@ def book_area_by_status(area_pk: int, validated_data: dict, user: User) -> (int,
     return 200, {}
 
 
-def user_booking_constant(user: User) -> (int, dict):
+def user_booking_history(user: User) -> (int, list):
     logger.info(
         msg=f'Получение истории постоянного бронирования '
             f'пользователя {user}',
@@ -146,7 +162,7 @@ def user_booking_constant(user: User) -> (int, dict):
             msg=f'Возникла ошибка при получении истории постоянного '
                 f'бронирования пользователя {user}: {exc}',
         )
-        return 500, {}
+        return 500, []
 
     response_data = BookingAreaSerializer(
         instance=bookings,
@@ -161,23 +177,21 @@ def user_booking_constant(user: User) -> (int, dict):
 
 def user_booking_temporary(user: User) -> (int, dict):
     logger.info(
-        msg=f'Получение истории временного бронирования '
-            f'пользователя {user}',
+        msg=f'Получение списка временных броней пользователя {user}',
     )
 
-    try:
-        matching_keys = redis_client.keys(f'*_user{user.id}_*')
-        temporary_bookings = [json.loads(redis_client.get(key)) for key in matching_keys]
-    except Exception as exc:
+    key_pattern = f'*_user{user.id}_*'
+    status, response_data = get_temporary_bookings_by_key(
+        key_pattern=key_pattern,
+    )
+    if status != 200:
         logger.error(
-            msg=f'Возникла ошибка при получении истории временного '
-                f'бронирования пользователя {user}: {exc}',
+            msg=f'Не удалось получить список временных броней '
+                f'пользователя {user}',
         )
-        return 500, {}
+        return status
 
-    response_data = temporary_bookings
     logger.info(
-        msg=f'Получена история временного бронирования '
-            f'пользователя {user}',
+        msg=f'Получен список временных броней пользователя {user}',
     )
     return 200, response_data
