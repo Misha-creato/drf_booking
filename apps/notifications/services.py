@@ -1,4 +1,3 @@
-from django.core.cache import cache
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
 
@@ -12,6 +11,7 @@ from notifications.models import (
 )
 
 from utils.logger import get_logger
+from utils.project_redis import get_email_settings
 
 
 User = get_user_model
@@ -48,7 +48,7 @@ class Email:
         return mail
 
     @property
-    def get_send_email_settings(self) -> EmailSettings | None:
+    def get_send_email_settings(self) -> dict | None:
         '''
         Получение настроек email
 
@@ -60,11 +60,11 @@ class Email:
             msg='Получение настроек email',
         )
 
-        email_settings = cache.get('email_settings')
+        email_settings = get_email_settings()
         if email_settings is None:
             try:
-                email_settings = EmailSettings.get_solo()
-                cache.set('email_settings', email_settings)
+                EmailSettings.get_solo()
+                email_settings = get_email_settings
             except Exception as exc:
                 logger.error(
                     msg=f'Не удалось получить настройки email'
@@ -134,7 +134,7 @@ class Email:
         '''
 
         email_settings = self.get_send_email_settings
-        if not email_settings or not email_settings.send_emails:
+        if not email_settings or not email_settings['send_emails']:
             logger.warning(
                 msg='Отправка писем отключена',
             )
