@@ -105,6 +105,9 @@ class ServicesTest(TestCase):
             with open(f'{path}/{fixture}_request.json') as file:
                 data = json.load(file)
 
+            if data.get('refresh') is None:
+                data['refresh'] = str(token)
+
             status_code, response_data = refresh_token(
                 data=data,
             )
