@@ -20,38 +20,40 @@ class AreaList200Response(DefaultAreaResponse):
 
     data = serializers.JSONField(
         default=[
-            {
-                "pk": 1,
-                "name": "Test",
-                "description": "<p>description</p>",
-                "address": "address",
-                "price": "1000",
-                "capacity": 1000,
-                "width": 200,
-                "length": 100,
-                "contacts": [
-                    {
-                        "contact": "88005553535",
-                        "contact_type": "Phone"
-                    },
-                    {
-                        "contact": "test3@cc.com",
-                        "contact_type": "Email"
-                    },
-                ],
-                "photos": [
-                    {
-                        "photo": "/media/photos/test.jpeg"
-                    }
-                ]
-            },
+            [
+                {
+                    "pk": 1,
+                    "name": "Test",
+                    "description": "<p>description</p>",
+                    "address": "address",
+                    "price": "1000",
+                    "capacity": 1000,
+                    "width": 200,
+                    "length": 100,
+                    "contacts": [
+                        {
+                            "contact": "88005553535",
+                            "contact_type": "Phone"
+                        },
+                        {
+                            "contact": "test3@cc.com",
+                            "contact_type": "Email"
+                        },
+                    ],
+                    "photos": [
+                        {
+                            "photo": "/media/photos/test.jpeg"
+                        }
+                    ]
+                },
+            ]
         ]
     )
 
 
 class Area200Response(DefaultAreaResponse):
     '''
-    Получение площадки по pk
+    Получение детальной информации о площадке
 
     '''
 
