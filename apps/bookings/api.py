@@ -6,7 +6,7 @@ from utils.response_patterns import generate_response
 
 from bookings.services import (
     booking_area,
-    user_booking_constant,
+    user_booking_history,
     user_booking_temporary,
 )
 
@@ -33,13 +33,13 @@ class BookingAreaView(APIView):
         )
 
 
-class UserBookingsConstantView(APIView):
+class UserBookingsHistoryView(APIView):
 
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
-        status_code, response_data = user_booking_constant(
+        status_code, response_data = user_booking_history(
             user=user,
         )
         status, data = generate_response(
