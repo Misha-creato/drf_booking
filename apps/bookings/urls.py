@@ -2,7 +2,7 @@ from django.urls import path
 
 from bookings.api import (
     BookingAreaView,
-    UserBookingsConstantView,
+    UserBookingsHistoryView,
     UserBookingsTemporaryView,
 )
 
@@ -14,12 +14,12 @@ urlpatterns = [
         name='booking_area',
     ),
     path(
-        'history/constant/',
-        UserBookingsConstantView.as_view(),
-        name='user_bookings_constant',
+        'users/history/',
+        UserBookingsHistoryView.as_view(),
+        name='user_bookings_history',
     ),
     path(
-        'history/temporary/',
+        'users/temporary/',
         UserBookingsTemporaryView.as_view(),
         name='user_bookings_temporary',
     ),
