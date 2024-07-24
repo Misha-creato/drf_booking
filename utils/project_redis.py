@@ -1,7 +1,10 @@
 import json
+import uuid
+
 import redis
 
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from config.settings import (
     REDIS_HOST,
@@ -33,8 +36,31 @@ def get_temporary_bookings_by_key(key_pattern: str) -> (int, list):
     logger.info(
         msg=f'Получен список временных броней по шаблону ключа {key_pattern}',
     )
-    print(temporary_bookings)
     return 200, temporary_bookings
+
+
+def set_temporary_booking(area_pk: int, validated_data: dict, user: User) -> (int, {}):
+    start_date = validated_data['start_date']
+    end_date = validated_data['end_date']
+    data = {
+        'area': area_pk,
+        'booked_from': start_date.strftime('%Y-%m-%d %H:%M:%S%z'),
+        'booked_to': end_date.strftime('%Y-%m-%d %H:%M:%S%z'),
+        'user_id': user.id,
+        'created_at': timezone.now().strftime('%Y-%m-%d %H:%M:%S%z'),
+    }
+    key = f'area{area_pk}_user{user.id}_{str(uuid.uuid4())}'
+    try:
+        key_data = json.dumps(data)
+        redis_client.setex(name=key, time=60, value=key_data)
+    except Exception as exc:
+        logger.error(
+            msg=f'Возникла ошибка при временном бронировании площадки {area_pk} '
+                f'пользователем {user}: {exc}',
+        )
+        return 500, {}
+
+    return 200, {}
 
 
 def set_email_settings(email_settings: dict) -> None:
