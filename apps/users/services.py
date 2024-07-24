@@ -241,7 +241,6 @@ def refresh_token(data: QueryDict) -> (int, dict):
     try:
         refresh = RefreshToken(validated_data['refresh'])
         user_id = refresh.payload['user_id']
-        print(refresh.payload)
         user = CustomUser.objects.get(id=user_id)
     except Exception as exc:
         logger.error(
