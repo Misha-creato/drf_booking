@@ -91,14 +91,21 @@ class Photo(models.Model):
     )
     photo = models.ImageField(
         verbose_name='Фото',
-        upload_to=area_photos_directory_path
+        upload_to='area_photos_path',
     )
     created_at = models.DateTimeField(
         verbose_name='Дата размещения',
         auto_now_add=True,
     )
 
+    @staticmethod
+    def area_photos_path(instance, filename):
+        return f'areas/{instance.area.name}/photos/{filename}'
+
     class Meta:
         db_table = 'area_photos'
         verbose_name = 'Фото'
         verbose_name_plural = 'Фото'
+
+
+Photo._meta.get_field('photo').upload_to = Photo.area_photos_path
