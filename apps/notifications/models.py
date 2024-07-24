@@ -1,8 +1,10 @@
 from django.db import models
+from django.forms import model_to_dict
 
 from solo.models import SingletonModel
 
 from utils.constants import EMAIL_TYPES
+from utils.project_redis import set_email_settings
 
 
 class EmailTemplate(models.Model):
@@ -37,6 +39,10 @@ class EmailSettings(SingletonModel):
 
     def __str__(self):
         return ''
+
+    def save(self, *args, **kwargs):
+        set_email_settings(email_settings=model_to_dict(self))
+        super().save(*args, **kwargs)
 
     class Meta:
         db_table = 'email_settings'
