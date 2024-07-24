@@ -1,0 +1,14 @@
+{
+  "price__lte": [
+    "10000"
+  ],
+  "length__lte": [
+    "100"
+  ],
+  "width__gte": [
+    "200"
+  ],
+  "capacity__gte": [
+    "100"
+  ]
+}
