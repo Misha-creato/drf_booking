@@ -39,12 +39,15 @@ class AreaListView(APIView):
         'name',
     ]
     ordering_fields = [
-        'price_int',
+        'price',
         'created_at',
         'capacity',
     ]
     filter_fields = [
         'price',
+        'capacity',
+        'width',
+        'length',
     ]
     filterset_class = AreaFilter
 
