@@ -157,15 +157,16 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=7),
 }
 
-# CACHE
 
+# Redis
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379",
-    }
-}
+REDIS_PORT = os.environ.get(
+    'REDIS_PORT', '6379'
+)
+
+REDIS_HOST = os.environ.get(
+    'REDIS_HOST', '127.0.0.1'
+)
 
 
 # Password validation
