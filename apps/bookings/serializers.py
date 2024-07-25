@@ -1,5 +1,4 @@
 import pytz
-
 from datetime import (
     datetime,
     time,
@@ -48,10 +47,10 @@ class BookAreaSerializer(serializers.Serializer):
     def validate(self, attrs):
         attrs = super().validate(attrs)
 
-        min_date = timezone.now().date()
+        min_date = timezone.now()
         start_date = attrs['start_date']
         end_date = attrs['end_date']
-        if start_date.date() < min_date:
+        if start_date < min_date:
             raise ValidationError(
                 'Дата начала бронирования не может быть в прошлом'
             )
@@ -67,8 +66,28 @@ class BookingAreaSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookingArea
         fields = [
+            'id',
             'area',
             'booked_from',
             'booked_to',
+            'user',
             'created_at'
         ]
+
+
+class GenerateQRSerializer(serializers.Serializer):
+    booking_id = serializers.CharField()
+
+
+class BookingAreaQRSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    area_name = serializers.SerializerMethodField()
+    user_nickname = serializers.SerializerMethodField()
+    booked_from = serializers.DateTimeField()
+    booked_to = serializers.DateTimeField()
+
+    def get_area_name(self, obj):
+        return obj.area.name
+
+    def get_user_nickname(self, obj):
+        return obj.user.nickname
