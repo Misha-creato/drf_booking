@@ -1,5 +1,6 @@
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
+from django.forms import model_to_dict
 
 from config.settings import (
     EMAIL_HOST_USER,
@@ -9,9 +10,8 @@ from notifications.models import (
     EmailSettings,
     EmailTemplate,
 )
-
+from utils import redis_cache
 from utils.logger import get_logger
-from utils.project_redis import get_email_settings
 
 
 User = get_user_model
@@ -60,17 +60,25 @@ class Email:
             msg='Получение настроек email',
         )
 
-        email_settings = get_email_settings()
+        status, email_settings = redis_cache.get(
+            key='email_settings',
+        )
         if email_settings is None:
             try:
-                EmailSettings.get_solo()
-                email_settings = get_email_settings
+                email_settings = model_to_dict(EmailSettings.get_solo())
             except Exception as exc:
                 logger.error(
                     msg=f'Не удалось получить настройки email'
                         f'Ошибки: {exc}',
                 )
                 return None
+
+            redis_cache.set_key(
+                key='email_settings',
+                data=email_settings,
+                time=60*60,
+            )
+
         logger.info(
             msg='Настройки email получены',
         )
