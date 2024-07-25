@@ -3,8 +3,8 @@ from django.forms import model_to_dict
 
 from solo.models import SingletonModel
 
+from utils import redis_cache
 from utils.constants import EMAIL_TYPES
-from utils.project_redis import set_email_settings
 
 
 class EmailTemplate(models.Model):
@@ -41,7 +41,11 @@ class EmailSettings(SingletonModel):
         return ''
 
     def save(self, *args, **kwargs):
-        set_email_settings(email_settings=model_to_dict(self))
+        redis_cache.set_key(
+            key='email_settings',
+            data=model_to_dict(self),
+            time=60*60,
+        )
         super().save(*args, **kwargs)
 
     class Meta:
