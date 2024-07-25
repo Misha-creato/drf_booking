@@ -35,6 +35,10 @@ class BookingArea(models.Model):
     booked_to = models.DateTimeField(
         verbose_name='До',
     )
+    started = models.BooleanField(
+        verbose_name='Начато',
+        default=False,
+    )
     created_at = models.DateTimeField(
         verbose_name='Дата бронирования',
         auto_now_add=True,
