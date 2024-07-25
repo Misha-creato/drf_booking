@@ -8,6 +8,8 @@ from bookings.services import (
     booking_area,
     user_booking_history,
     user_booking_temporary,
+    get_area_qr_data,
+    area_qr_check,
 )
 
 
@@ -33,7 +35,7 @@ class BookingAreaView(APIView):
         )
 
 
-class UserBookingsHistoryView(APIView):
+class UserBookingAreaHistoryView(APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -52,7 +54,7 @@ class UserBookingsHistoryView(APIView):
         )
 
 
-class UserBookingsTemporaryView(APIView):
+class UserBookingAreaTemporaryView(APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -60,6 +62,44 @@ class UserBookingsTemporaryView(APIView):
         user = request.user
         status_code, response_data = user_booking_temporary(
             user=user,
+        )
+        status, data = generate_response(
+            status_code=status_code,
+            data=response_data,
+        )
+        return Response(
+            status=status,
+            data=data,
+        )
+
+
+class BookingAreaQRDataView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = request.data
+        status_code, response_data = get_area_qr_data(
+            data=data,
+        )
+        status, data = generate_response(
+            status_code=status_code,
+            data=response_data,
+        )
+        return Response(
+            status=status,
+            data=data,
+        )
+
+
+class BookingAreaQRCheckView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = request.data
+        status_code, response_data = area_qr_check(
+            data=data,
         )
         status, data = generate_response(
             status_code=status_code,
