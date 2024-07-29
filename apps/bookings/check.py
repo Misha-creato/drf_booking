@@ -11,7 +11,7 @@ def booking_dates(constant: list, temporary: list, validated_data: dict, user_id
     for booking in temporary:
         booked_from = datetime.strptime(booking['booked_from'], '%Y-%m-%d %H:%M:%S%z')
         booked_to = datetime.strptime(booking['booked_to'], '%Y-%m-%d %H:%M:%S%z')
-        if booked_from < end_date or booked_to > start_date:
+        if booked_from <= end_date or booked_to >= start_date:
             if booking['user_id'] != user_id or is_temporary:
                 return False
     return True
