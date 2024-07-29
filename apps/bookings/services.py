@@ -1,5 +1,6 @@
 import uuid
 
+from django.forms import model_to_dict
 from django.http import QueryDict
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -10,7 +11,10 @@ from utils import redis_cache
 from utils.logger import get_logger
 
 from bookings import check
-from bookings.models import BookingArea
+from bookings.models import (
+    BookingArea,
+    BookingSettings,
+)
 from bookings.serializers import (
     BookAreaSerializer,
     BookingAreaSerializer,
@@ -29,6 +33,17 @@ def booking_area(area_pk: int, data: QueryDict, user: User) -> (int, dict):
         msg=f'Бронирование площадки {area_pk} пользователем {user}, '
             f'(временная бронь - {temporary})'
     )
+
+    serializer = BookAreaSerializer(
+        data=data,
+    )
+    if not serializer.is_valid():
+        logger.error(
+            msg=f'Невалидные данные для бронирования площадки {area_pk} '
+                f'пользователем {user} (временная бронь - {temporary}): '
+                f'{serializer.errors}',
+        )
+        return 400, {}
 
     try:
         area = Area.objects.filter(
@@ -51,23 +66,12 @@ def booking_area(area_pk: int, data: QueryDict, user: User) -> (int, dict):
         )
         return 404, {}
 
-    serializer = BookAreaSerializer(
-        data=data,
-    )
-    if not serializer.is_valid():
-        logger.error(
-            msg=f'Невалидные данные для бронирования площадки {area_pk} '
-                f'пользователем {user} (временная бронь - {temporary}): '
-                f'{serializer.errors}',
-        )
-        return 400, {}
-
     validated_data = serializer.validated_data
     try:
         constant_bookings = BookingArea.objects.filter(
             area__pk=area_pk,
-            booked_from__lt=validated_data['end_date'],
-            booked_to__gt=validated_data['start_date'],
+            booked_from__lte=validated_data['end_date'],
+            booked_to__gte=validated_data['start_date'],
         )
     except Exception as exc:
         logger.error(
@@ -127,10 +131,25 @@ def booking_area(area_pk: int, data: QueryDict, user: User) -> (int, dict):
             'user_id': user.id,
             'created_at': timezone.now().strftime('%Y-%m-%d %H:%M:%S%z'),
         }
+
+        status, booking_settings = redis_cache.get(
+            key='booking_settings',
+        )
+        if booking_settings is None:
+            try:
+                booking_settings = model_to_dict(BookingSettings.get_solo())
+            except Exception as exc:
+                logger.error(
+                    msg=f'Возникла ошибка при бронировании площадки {area_pk} '
+                        f'пользователем {user} (временная бронь - {temporary}): '
+                        f'{exc}',
+                )
+                return 500, {}
+
         status = redis_cache.set_key(
             key=key,
             data=data,
-            time=60 * 60,
+            time=booking_settings['temporary_timeout'],
         )
         if status != 200:
             logger.error(
@@ -300,9 +319,15 @@ def area_qr_check(data: QueryDict) -> (int, dict):
         return 400, {}
 
     validated_data = serializer.validated_data
+    if validated_data['started']:
+        logger.error(
+            msg=f'Начало бронирования уже подтверждено',
+        )
+        return 400, {}
+
     try:
         booking = BookingArea.objects.filter(
-            id=validated_data['id'],
+            id=validated_data['uuid'],
             booked_to__gt=timezone.now(),
         ).first()
     except Exception as exc:
@@ -320,6 +345,7 @@ def area_qr_check(data: QueryDict) -> (int, dict):
         return 400, {}
 
     booking.started = True
+    booking.started_at = timezone.now()
     try:
         booking.save()
     except Exception as exc:
