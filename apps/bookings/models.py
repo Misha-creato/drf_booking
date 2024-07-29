@@ -3,6 +3,8 @@ import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
 
+from solo.models import SingletonModel
+
 from areas.models import Area
 
 
@@ -10,10 +12,11 @@ User = get_user_model()
 
 
 class BookingArea(models.Model):
-    id = models.CharField(
+    uuid = models.UUIDField(
         verbose_name='Идентификатор',
-        max_length=64,
         primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
     )
     area = models.ForeignKey(
         verbose_name='Площадка',
@@ -39,6 +42,11 @@ class BookingArea(models.Model):
         verbose_name='Начато',
         default=False,
     )
+    started_at = models.DateTimeField(
+        verbose_name='Дата начала',
+        null=True,
+        blank=True,
+    )
     created_at = models.DateTimeField(
         verbose_name='Дата бронирования',
         auto_now_add=True,
@@ -47,13 +55,21 @@ class BookingArea(models.Model):
     def __str__(self):
         return f'{self.area}'
 
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.id = str(uuid.uuid4())
-        
-        super().save(*args, **kwargs)
-
     class Meta:
         db_table = 'bookings_area'
         verbose_name = 'Бронь площадок'
         verbose_name_plural = 'Брони площадок'
+
+
+class BookingSettings(SingletonModel):
+    temporary_timeout = models.IntegerField(
+        verbose_name='Время жизни временной брони',
+        default=60*60,
+    )
+
+    def __str__(self):
+        return ''
+
+    class Meta:
+        db_table = 'bookings_settings'
+        verbose_name = 'Настройки брони'
