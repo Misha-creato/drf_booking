@@ -66,12 +66,14 @@ class BookingAreaSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookingArea
         fields = [
-            'id',
+            'uuid',
             'area',
             'booked_from',
             'booked_to',
             'user',
             'created_at'
+            'started',
+            'started_at',
         ]
 
 
@@ -81,13 +83,11 @@ class GenerateQRSerializer(serializers.Serializer):
 
 class BookingAreaQRSerializer(serializers.Serializer):
     id = serializers.CharField()
-    area_name = serializers.SerializerMethodField()
-    user_nickname = serializers.SerializerMethodField()
+    area_name = serializers.CharField()
+    user_nickname = serializers.CharField()
     booked_from = serializers.DateTimeField()
     booked_to = serializers.DateTimeField()
-
-    def get_area_name(self, obj):
-        return obj.area.name
-
-    def get_user_nickname(self, obj):
-        return obj.user.nickname
+    started = serializers.IntegerField(
+        min_value=0,
+        max_value=1
+    )
