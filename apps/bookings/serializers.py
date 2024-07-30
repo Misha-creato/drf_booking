@@ -71,23 +71,20 @@ class BookingAreaSerializer(serializers.ModelSerializer):
             'booked_from',
             'booked_to',
             'user',
-            'created_at'
+            'created_at',
             'started',
             'started_at',
         ]
 
 
 class GenerateQRSerializer(serializers.Serializer):
-    booking_id = serializers.CharField()
+    booking_uuid = serializers.CharField()
 
 
 class BookingAreaQRSerializer(serializers.Serializer):
-    id = serializers.CharField()
+    uuid = serializers.CharField()
     area_name = serializers.CharField()
     user_nickname = serializers.CharField()
     booked_from = serializers.DateTimeField()
     booked_to = serializers.DateTimeField()
-    started = serializers.IntegerField(
-        min_value=0,
-        max_value=1
-    )
+
