@@ -13,6 +13,13 @@ import os
 import sys
 from datetime import timedelta
 from pathlib import Path
+from typing import Dict, Any
+
+
+# ENVIRONMENT
+ENVIRONMENT = os.environ.get(
+    'ENVIRONMENT', 'production',
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +35,7 @@ SECRET_KEY = os.environ.get(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get(
-    'DEBUG', 'True'
+    'DEBUG', 'False'
 )
 DEBUG = DEBUG == 'True'
 
@@ -37,6 +44,18 @@ ALLOWED_HOSTS = os.environ.get(
 ).split(',')
 
 AUTH_USER_MODEL = 'users.CustomUser'
+
+# SECURITY
+
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# SECURE_HSTS_SECONDS = 3600
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
+# SECURE_BROWSER_XSS_FILTER = True
+# X_FRAME_OPTIONS = 'DENY'
+
 
 # Application definition
 
@@ -137,6 +156,12 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
+# DRF_Spectacular
+
+SPECTACULAR_SETTINGS: Dict[str, Any] = {
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAdminUser']
+}
+
 # JWT
 
 SIMPLE_JWT = {
@@ -206,6 +231,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media
 
@@ -245,6 +271,7 @@ SITE_PROTOCOL = os.environ.get(
 FIXTURE_DIRS = (
     os.path.join(BASE_DIR, 'apps', 'notifications', 'tests', 'fixtures'),
     os.path.join(BASE_DIR, 'apps', 'areas', 'tests', 'fixtures'),
+    os.path.join(BASE_DIR, 'apps', 'bookings', 'tests', 'fixtures'),
 )
 
 # ckeditor
