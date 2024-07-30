@@ -1,6 +1,5 @@
 import uuid
 
-from django.forms import model_to_dict
 from django.http import QueryDict
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -67,6 +66,7 @@ def booking_area(area_pk: int, data: QueryDict, user: User) -> (int, dict):
         return 404, {}
 
     validated_data = serializer.validated_data
+    temporary = validated_data['temporary']
     try:
         constant_bookings = BookingArea.objects.filter(
             area__pk=area_pk,
@@ -134,17 +134,17 @@ def booking_area(area_pk: int, data: QueryDict, user: User) -> (int, dict):
 
         status, booking_settings = redis_cache.get(
             key='booking_settings',
+            model=BookingSettings,
+            timeout=60*60,
+            pk=1,
         )
-        if booking_settings is None:
-            try:
-                booking_settings = model_to_dict(BookingSettings.get_solo())
-            except Exception as exc:
-                logger.error(
-                    msg=f'Возникла ошибка при бронировании площадки {area_pk} '
-                        f'пользователем {user} (временная бронь - {temporary}): '
-                        f'{exc}',
-                )
-                return 500, {}
+        if status != 200:
+            logger.error(
+                msg=f'Не удалось временно забронировать площадку {area_pk} '
+                    f'пользователем {user} (временная бронь - {temporary})'
+                    f'Настройки бронирования не найдены',
+            )
+            return status, {}
 
         status = redis_cache.set_key(
             key=key,
@@ -277,7 +277,7 @@ def get_area_qr_data(data: QueryDict) -> (int, dict):
     validated_data = serializer.validated_data
     try:
         booking = BookingArea.objects.filter(
-            id=validated_data['booking_id'],
+            uuid=validated_data['booking_uuid'],
             booked_to__gt=timezone.now()
         ).first()
     except Exception as exc:
@@ -319,15 +319,10 @@ def area_qr_check(data: QueryDict) -> (int, dict):
         return 400, {}
 
     validated_data = serializer.validated_data
-    if validated_data['started']:
-        logger.error(
-            msg=f'Начало бронирования уже подтверждено',
-        )
-        return 400, {}
 
     try:
         booking = BookingArea.objects.filter(
-            id=validated_data['uuid'],
+            uuid=validated_data['uuid'],
             booked_to__gt=timezone.now(),
         ).first()
     except Exception as exc:
@@ -341,6 +336,12 @@ def area_qr_check(data: QueryDict) -> (int, dict):
         logger.error(
             msg=f'Бронирование {data} для подтверждения '
                 f'начала не найдено',
+        )
+        return 400, {}
+
+    if booking.started:
+        logger.error(
+            msg=f'Начало бронирования уже подтверждено',
         )
         return 400, {}
 
