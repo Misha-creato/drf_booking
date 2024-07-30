@@ -3,6 +3,7 @@ import redis
 from typing import Any
 
 from django.contrib.auth import get_user_model
+from django.forms import model_to_dict
 
 from config.settings import (
     REDIS_HOST,
@@ -41,7 +42,7 @@ def set_key(key: str, data: Any, time: int = None) -> int:
     return 200
 
 
-def get(key: str) -> (int, Any):
+def get(key: str, model: Any = None, timeout: int = None, **kwargs) -> (int, Any):
     logger.info(
         msg=f'Получение данных из redis по ключу {key}',
     )
@@ -54,6 +55,27 @@ def get(key: str) -> (int, Any):
                 f'по ключу {key}: {exc}',
         )
         return 500, None
+
+    if model and data is None:
+        logger.error(
+            msg=f'Данные по ключу {key} не существуют в redis',
+        )
+        try:
+            data, created = model.objects.get_or_create(**kwargs)
+        except Exception as exc:
+            logger.error(
+                msg=f'Возникла ошибка при получении данных из redis '
+                    f'по ключу {key}: {exc}',
+            )
+            return 500, None
+
+        data = model_to_dict(data)
+        set_key(
+            key=key,
+            data=data,
+            time=timeout,
+        )
+        return 200, data
 
     logger.info(
         msg=f'Успешно получены данные из redis по ключу {key}'
