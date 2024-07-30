@@ -62,22 +62,15 @@ class Email:
 
         status, email_settings = redis_cache.get(
             key='email_settings',
+            model=EmailSettings,
+            timeout=60*60,
+            pk=1,
         )
-        if email_settings is None:
-            try:
-                email_settings = model_to_dict(EmailSettings.get_solo())
-            except Exception as exc:
-                logger.error(
-                    msg=f'Не удалось получить настройки email'
-                        f'Ошибки: {exc}',
-                )
-                return None
-
-            redis_cache.set_key(
-                key='email_settings',
-                data=email_settings,
-                time=60*60,
+        if status != 200:
+            logger.error(
+                msg=f'Не удалось получить настройки email',
             )
+            return None
 
         logger.info(
             msg='Настройки email получены',
