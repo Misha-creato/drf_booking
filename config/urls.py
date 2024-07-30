@@ -24,12 +24,19 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+from config import settings
+
+
 urlpatterns = [
     path("ckeditor5/", include('django_ckeditor_5.urls')),
     path('admin/', admin.site.urls),
     path('api/v1/users/', include('users.urls')),
     path('api/v1/areas/', include('areas.urls')),
     path('api/v1/bookings/', include('bookings.urls')),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='docs'),
 ]
+
+if settings.ENVIRONMENT == 'development':
+    urlpatterns += [
+        path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+        path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='docs'),
+    ]
