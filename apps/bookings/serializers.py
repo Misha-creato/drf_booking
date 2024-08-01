@@ -83,8 +83,13 @@ class GenerateQRSerializer(serializers.Serializer):
 
 class BookingAreaQRSerializer(serializers.Serializer):
     uuid = serializers.CharField()
-    area_name = serializers.CharField()
-    user_nickname = serializers.CharField()
+    area_name = serializers.SerializerMethodField()
+    user_nickname = serializers.SerializerMethodField()
     booked_from = serializers.DateTimeField()
     booked_to = serializers.DateTimeField()
 
+    def get_area_name(self, obj):
+        return obj.area.name
+
+    def get_user_nickname(self, obj):
+        return obj.user.nickname
