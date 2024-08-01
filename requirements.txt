@@ -10,3 +10,4 @@ django-ckeditor-5==0.2.13
 django-filter==24.2
 redis==5.0.7
 pytz==2024.1
+gunicorn==22.0.0
