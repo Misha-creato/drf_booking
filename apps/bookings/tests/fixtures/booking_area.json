@@ -1,0 +1,28 @@
+[
+  {
+    "model": "bookings.bookingarea",
+    "pk": "78962811-1db7-46bf-972a-74540202bb9e",
+    "fields": {
+      "area": 1,
+      "user": 2,
+      "booked_from": "2024-07-31T07:00:00Z",
+      "booked_to": "2024-08-05T07:00:00Z",
+      "started": false,
+      "started_at": null,
+      "created_at": "2024-07-30T14:58:04.135Z"
+    }
+  },
+  {
+    "model": "bookings.bookingarea",
+    "pk": "3fda0f66-3ae5-4b7d-9e7c-a0981e69a599",
+    "fields": {
+      "area": 3,
+      "user": 2,
+      "booked_from": "2024-08-03T07:00:00Z",
+      "booked_to": "2024-08-05T07:00:00Z",
+      "started": false,
+      "started_at": null,
+      "created_at": "2024-07-30T14:58:04.135Z"
+    }
+  }
+]
