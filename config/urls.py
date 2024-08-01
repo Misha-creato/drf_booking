@@ -35,7 +35,7 @@ urlpatterns = [
     path('api/v1/bookings/', include('bookings.urls')),
 ]
 
-if settings.ENVIRONMENT == 'development':
+if settings.DEBUG:
     urlpatterns += [
         path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
         path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='docs'),

@@ -13,13 +13,7 @@ import os
 import sys
 from datetime import timedelta
 from pathlib import Path
-from typing import Dict, Any
 
-
-# ENVIRONMENT
-ENVIRONMENT = os.environ.get(
-    'ENVIRONMENT', 'production',
-)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,27 +29,24 @@ SECRET_KEY = os.environ.get(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get(
-    'DEBUG', 'False'
+    'DEBUG', 'True'
 )
 DEBUG = DEBUG == 'True'
 
 ALLOWED_HOSTS = os.environ.get(
-    'ALLOWED_HOSTS', '127.0.0.1'
-).split(',')
+    'ALLOWED_HOSTS', 'localhost, 127.0.0.1'
+).replace(' ', '').replace('|', '').split(',')
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
-# SECURITY
+# CSRF
 
-# SECURE_SSL_REDIRECT = True
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# SECURE_HSTS_SECONDS = 3600
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_HSTS_PRELOAD = True
-# SECURE_BROWSER_XSS_FILTER = True
-# X_FRAME_OPTIONS = 'DENY'
-
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1',
+]
+CORS_ORIGIN_WHITELIST = [
+    'http://127.0.0.1',
+]
 
 # Application definition
 
@@ -156,12 +147,6 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
-# DRF_Spectacular
-
-SPECTACULAR_SETTINGS: Dict[str, Any] = {
-    'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAdminUser']
-}
-
 # JWT
 
 SIMPLE_JWT = {
@@ -231,7 +216,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'static'
 
 # Media
 
