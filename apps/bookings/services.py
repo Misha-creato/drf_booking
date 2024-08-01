@@ -292,7 +292,7 @@ def get_area_qr_data(data: QueryDict) -> (int, dict):
             msg=f'Бронирование {data} при получении данных '
                 f'для генерации QR не найдено',
         )
-        return 400, {}
+        return 410, {}
 
     response_data = BookingAreaQRSerializer(
         instance=booking,
@@ -337,7 +337,7 @@ def area_qr_check(data: QueryDict) -> (int, dict):
             msg=f'Бронирование {data} для подтверждения '
                 f'начала не найдено',
         )
-        return 400, {}
+        return 410, {}
 
     if booking.started:
         logger.error(
