@@ -29,12 +29,12 @@ SECRET_KEY = os.environ.get(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get(
-    'DEBUG', 'True'
+    'DEBUG', 'False'
 )
 DEBUG = DEBUG == 'True'
 
 ALLOWED_HOSTS = os.environ.get(
-    'ALLOWED_HOSTS', 'localhost, 127.0.0.1'
+    'ALLOWED_HOSTS', 'localhost, 127.0.0.1, 127.0.0.1:80'
 ).replace(' ', '').replace('|', '').split(',')
 
 AUTH_USER_MODEL = 'users.CustomUser'
@@ -43,9 +43,11 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1',
+    'http://127.0.0.1:80',
 ]
 CORS_ORIGIN_WHITELIST = [
     'http://127.0.0.1',
+    'http://127.0.0.1:80',
 ]
 
 # Application definition
@@ -215,13 +217,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'static'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'var/www/staticfiles')
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static'),
+# ]
 
 # Media
 
 MEDIA_ROOT = BASE_DIR / "media"
-MEDIA_URL = "media/"
+MEDIA_URL = "/media/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
