@@ -86,7 +86,7 @@ def rotator(source, dest):
     os.remove(source)
 
 
-def get_logger(name: str) -> logging.Logger:
+def get_logger(name: str, app: str = 'booking') -> logging.Logger:
     '''
     Получение логгера
 
@@ -109,7 +109,7 @@ def get_logger(name: str) -> logging.Logger:
         os.makedirs(LOG_DIR)
 
     file_handler = logging.handlers.TimedRotatingFileHandler(
-        f"{LOG_DIR}/{name}.log",
+        f"{LOG_DIR}/{app}.log",
         when='midnight',
         interval=1,
         atTime=datetime.time(23, 59, 59),
