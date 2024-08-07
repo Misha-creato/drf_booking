@@ -12,3 +12,4 @@ redis==5.0.7
 pytz==2024.1
 gunicorn==22.0.0
 supervisor==4.2.5
+gevent==24.2.1
