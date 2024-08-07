@@ -5,35 +5,12 @@ import os
 import shutil
 import datetime
 
-from colorama import (
-    init,
-    Fore,
-    Style,
-)
 
-
-init(autoreset=True)
-
-
-LEVEL_COLORS = {
-    logging.DEBUG: Fore.CYAN,
-    logging.INFO: Fore.GREEN,
-    logging.WARNING: Fore.YELLOW,
-    logging.ERROR: Fore.RED,
-    logging.CRITICAL: Fore.MAGENTA,
-}
 LOG_DIR = 'logs'
 LOG_DIR_ARCHIVE = 'archive'
 
 
-class ColorFormatter(logging.Formatter):
-    COLOR_CODES = {
-        'DEBUG': Fore.CYAN,
-        'INFO': Fore.GREEN,
-        'WARNING': Fore.YELLOW,
-        'ERROR': Fore.RED,
-        'CRITICAL': Fore.MAGENTA
-    }
+class CustomFormatter(logging.Formatter):
 
     def get_func_hierarchy(self, record) -> str:
         '''
@@ -60,12 +37,6 @@ class ColorFormatter(logging.Formatter):
     def format(self, record):
         record.func_hierarchy = self.get_func_hierarchy(record)
 
-        levelname = record.levelname
-        if levelname in self.COLOR_CODES:
-            levelname_color = f"{self.COLOR_CODES[levelname]}{levelname}{Style.RESET_ALL}"
-            name_color = f"{self.COLOR_CODES[levelname]}{record.name}{Style.RESET_ALL}"
-            record.levelname = levelname_color
-            record.name = name_color
         return super().format(record)
 
 
@@ -100,7 +71,7 @@ def get_logger(name: str, app: str = 'booking') -> logging.Logger:
     logger = logging.getLogger(name)
     console_handler = logging.StreamHandler()
     logger.setLevel(logging.DEBUG)
-    formatter = ColorFormatter(
+    formatter = CustomFormatter(
         '%(asctime)s %(levelname)s %(message)s %(name)s.%(funcName)s %(func_hierarchy)s'
     )
     console_handler.setFormatter(formatter)
