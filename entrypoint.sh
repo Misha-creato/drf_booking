@@ -6,6 +6,8 @@ fi
 
 if [ "$DEBUG" = "True" ]; then
   echo "Debug mode is ON. Executing debug commands..."
+  python manage.py migrate&
+  redis-server&
   python manage.py runserver 127.0.0.1:8000
 else
   echo "Debug mode is OFF. Executing production commands..."
