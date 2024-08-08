@@ -17,6 +17,7 @@ local_settings.py
 
 # Logs
 logs/
+*.log
 
 # Media
 media/
