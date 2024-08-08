@@ -4,15 +4,25 @@ if [ -z "$DEBUG" ]; then
   DEBUG=True
 fi
 
+if [ -z "$HOST" ]; then
+  HOST='0.0.0.0'
+fi
+
+if [ -z "$PORT" ]; then
+  PORT='8000'
+fi
+
+if [ -z "$WORKERS" ]; then
+  WORKERS=3
+fi
+
+python manage.py migrate
+
 if [ "$DEBUG" = "True" ]; then
   echo "Debug mode is ON. Executing debug commands..."
-  python manage.py migrate&
-  redis-server&
-  python manage.py runserver 127.0.0.1:8000
+  python manage.py runserver $HOST:$PORT
 else
   echo "Debug mode is OFF. Executing production commands..."
   python manage.py collectstatic --noinput&
-  python manage.py migrate&
-  redis-server&
-  sudo supervisord -n -c supervisord.conf
+  gunicorn -c gunicorn.conf.py --bind=$HOST:$PORT --workers=$WORKERS
 fi
